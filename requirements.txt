@@ -1,17 +1,8 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 shiny==1.9.0
-pandas==1.4.4
-numpy==1.22.4
-openpyxl>=3.1,<4
-matplotlib==3.8.4
-py7zr>=0.20,<1
-summit==0.8.9
-torch==1.13.1
-numba==0.55.2
-llvmlite==0.38.1
-scikit-learn==1.2.2
-scipy==1.12.0
-skorch==0.11.0
-botorch==0.8.5
-gpytorch==1.10
-linear-operator==0.4.0
-setuptools==69.5.1
+pandas>=2.0,<3
+numpy>=1.26,<3
+openpyxl>=3.1
+matplotlib>=3.8,<4
+py7zr>=1.0,<2
+torch==2.10.0+cpu

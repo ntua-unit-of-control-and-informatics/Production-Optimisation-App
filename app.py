@@ -21,6 +21,56 @@ from matplotlib.ticker import ScalarFormatter, MaxNLocator
 HERE = Path(__file__).parent
 
 
+def load_direct_emulator(root):
+    import torch
+    paths = list(root.rglob("emulator_model.json"))
+    if len(paths) != 1:
+        raise ValueError("Expected one emulator_model.json")
+    path = paths[0]
+    config = json.loads(path.read_text())
+    params = config["experiment_params"]
+    if params["regressor_name"] != "ANNRegressor" or params.get("descriptors_features"):
+        raise ValueError("Only ANNRegressor models without descriptor encoding are supported.")
+    variables = config["domain"]
+    inputs = [v for v in variables if not v["is_objective"]]
+    nums = [v for v in inputs if v["type"] == "ContinuousVariable"]
+    cats = [v for v in inputs if v["type"] == "CategoricalVariable"]
+    outputs = [next(v for v in variables if v["name"] == name and v["is_objective"]) for name in params["output_variable_names"]]
+    models = []
+    for i, prep in enumerate(params["predictors"]):
+        state = torch.load(path.parent / f"{params['model_name']}_predictor_{i}.pt", map_location="cpu", weights_only=True)
+        if set(state) != {"input_layer.weight", "input_layer.bias", "output_layer.weight", "output_layer.bias"}:
+            raise ValueError("Unsupported ANN architecture")
+        w = state["input_layer.weight"]
+        if w.shape[1] != len(nums) + sum(len(v["levels"]) for v in cats) or state["output_layer.weight"].shape != (len(outputs), w.shape[0]):
+            raise ValueError("Model dimensions do not match saved domain")
+        models.append((state, prep))
+    if not models: raise ValueError("No predictors found")
+    def predict(vals):
+        numeric = np.array([float(vals[v["name"]]) for v in nums])
+        categorical = []
+        for v in cats:
+            value = vals[v["name"]]
+            if value not in v["levels"]: raise ValueError(f"Unknown category for {v['name']}")
+            categorical.extend(float(value == level) for level in v["levels"])
+        predictions = []
+        with torch.inference_mode():
+            for state, prep in models:
+                ip = prep["input_preprocessor"]["num"]
+                op = prep["output_preprocessor"]
+                x = torch.tensor(np.r_[(numeric - ip["mean_"]) / ip["scale_"], categorical], dtype=torch.float32)
+                y = torch.nn.functional.linear(torch.relu(torch.nn.functional.linear(x, state["input_layer.weight"], state["input_layer.bias"])), state["output_layer.weight"], state["output_layer.bias"]).numpy()
+                y *= np.asarray(op["scale_"])
+                y += np.asarray(op["mean_"])
+                clip = params.get("clip", True)
+                for j, v in enumerate(outputs):
+                    if clip is True or isinstance(clip, list) and v["name"] in clip:
+                        y[j] = np.clip(y[j], *v["bounds"])
+                predictions.append(y)
+        return dict(zip(params["output_variable_names"], np.mean(predictions, axis=0)))
+    return predict, variables, outputs
+
+
 def card(title, *children):
     return ui.div(ui.h3(title, class_="card-title"), *children, class_="section-card")
 
@@ -527,18 +577,9 @@ def server(input, output, session):
             prediction_message.set("Load experimental data and create or load a domain in Tab 1.")
             return
         try:
-            # Only the exact owner-provided archive is enabled on public deployments.
-            with open(info[0]["datapath"], "rb") as model_file:
-                digest = hashlib.sha256(model_file.read()).hexdigest()
-            if digest != "bf2dddaa296544910e7f2db94301086dca22648eaf2a55cc563c05ff0bb3b197" and os.environ.get("TSEMO_TRUSTED_MODELS") != "1":
-                raise ValueError("This emulator archive is not approved for public execution. Upload the original approved emulator_model.7z, or use trusted local testing.")
-            from summit import Domain
-            from summit.domain import ContinuousVariable, CategoricalVariable
-            from summit.utils.dataset import DataSet
-            from summit.benchmarks import ExperimentalEmulator
-            if raw is None or cfg is None or not info:
-                raise ValueError("Load experimental data, create or load a domain, and upload the emulator archive first.")
-            dom = Domain()
+            digest = hashlib.sha256(Path(info[0]["datapath"]).read_bytes()).hexdigest()
+            if digest not in ('5796e439761554954e427ab30722ddb2083485be1a129411904578928041b1f1', 'bf2dddaa296544910e7f2db94301086dca22648eaf2a55cc563c05ff0bb3b197'):
+                raise ValueError("Upload an approved emulator archive (ZIP or 7z).")
             clean = pd.DataFrame()
             specs = []
             for _, row in cfg.iterrows():
@@ -557,7 +598,6 @@ def server(input, output, session):
                     clean[name] = raw[original].astype(str)
                     levels = str(row.get("Levels", "")).strip()
                     levels = [x.strip() for x in levels.split(",") if x.strip()] if levels and levels.lower() != "nan" else sorted(clean[name].unique())
-                    dom += CategoricalVariable(name=name, description=label, levels=levels)
                     specs.append((name,label,levels,None,None,0))
                 else:
                     clean[name] = pd.to_numeric(raw[original], errors="raise")
@@ -567,7 +607,6 @@ def server(input, output, session):
                         if len(nums)==2: lo,hi=map(float,nums)
                     lo = float(clean[name].min() if pd.isna(lo) else lo)
                     hi = float(clean[name].max() if pd.isna(hi) else hi)
-                    dom += ContinuousVariable(name=name, description=label, bounds=[lo,hi], is_objective=objective, maximize=role=="maximize")
                     if not objective: specs.append((name,label,None,lo,hi,int(row.get("Decimals",4))))
             with tempfile.TemporaryDirectory(prefix="shiny_emulator_") as tmp:
                 root=Path(tmp)
@@ -579,14 +618,13 @@ def server(input, output, session):
                 else:
                     import py7zr
                     with py7zr.SevenZipFile(info[0]["datapath"],mode="r") as z: z.extractall(root)
-                candidates=[d for d in root.rglob("*") if d.is_dir() and d.name.lower()=="emulator_model"]
-                children=list(root.iterdir())
-                model_dir=min(candidates,key=lambda d:len(d.parts)) if candidates else (children[0] if len(children)==1 and children[0].is_dir() else root)
-                emul=ExperimentalEmulator(model_name="emulator_model",domain=dom,dataset=DataSet.from_df(clean))
-                loaded=emul.load(model_name="emulator_model",save_dir=str(model_dir))
-                if loaded is not None: emul=loaded
-                if getattr(emul,"predictors",None) is None: raise ValueError("No predictors found in saved emulator.")
-            prediction_model.set((emul,dom,clean,specs,DataSet))
+                predict, variables, outputs = load_direct_emulator(root)
+                expected = {v["name"] for v in variables if not v["is_objective"]}
+                if expected != {v[0] for v in specs} or not {v["name"] for v in outputs}.issubset(clean.columns):
+                    raise ValueError("Tab 1 domain names do not match the saved emulator domain.")
+                saved = {v["name"]: v for v in variables}
+                specs = [(name, label, saved[name].get("levels"), *(saved[name].get("bounds", [None, None])), digits) for name,label,levels,lo,hi,digits in specs]
+            prediction_model.set((predict,outputs,clean,specs,None))
             prediction_message.set("Emulator loaded. Edit inputs and click Predict Outputs.")
         except Exception as exc:
             prediction_message.set(f"Could not load emulator: {exc}")
@@ -635,14 +673,12 @@ def server(input, output, session):
                     mask &= np.isclose(clean[name].astype(float),value,rtol=0,atol=1e-10)
                 else: mask &= clean[name].astype(str).eq(str(value)).to_numpy()
                 vals[name]=value
-            pred=emul.run_experiments(DataSet.from_df(pd.DataFrame([vals])))
+            pred=emul(vals)
             rows=[]
-            for var in dom.variables:
-                if not var.is_objective: continue
-                col=(var.name,"DATA") if isinstance(pred.columns,pd.MultiIndex) else var.name
-                value=float(pred[col].iloc[0])
-                actual=clean.loc[mask,var.name]
-                rows.append({"Objective":var.description,"Original":var.name,"Predicted":value,"Actual":float(actual.iloc[0]) if len(actual) else np.nan,"Direction":"Maximize" if var.maximize else "Minimize"})
+            for var in dom:
+                name=var["name"]
+                actual=clean.loc[mask,name]
+                rows.append({"Objective":var["description"],"Original":name,"Predicted":float(pred[name]),"Actual":float(actual.iloc[0]) if len(actual) else np.nan,"Direction":"Maximize" if var["maximize"] else "Minimize"})
             prediction_data.set(pd.DataFrame(rows))
             prediction_message.set("Prediction complete." + (" Outside domain: "+", ".join(warnings) if warnings else ""))
         except Exception as exc: prediction_message.set(f"Prediction failed: {exc}")
@@ -1406,7 +1442,7 @@ def server(input, output, session):
         tab = input.main_tab()
         steps = {
             "data": ("Data & Domain", [("Load experimental_data.csv", data() is not None), ("Create or load domain_table.csv", domain() is not None)], "Complete this tab before proceeding to later analyses."),
-            "emulator": ("Emulator Training", [("Upload emulator_model.zip or .7z", bool(input.emulator_zip())), ("Predict outputs", prediction_data.get() is not None)], "Prediction uses a trusted saved Summit emulator; training is disabled."),
+            "emulator": ("Emulator Training", [("Upload emulator_model.zip or .7z", bool(input.emulator_zip())), ("Predict outputs", prediction_data.get() is not None)], "Prediction uses direct CPU inference from an approved saved emulator; training is disabled."),
             "tsemo": ("TS-EMO Analysis", [("Load HV_coverage_data.csv", hv() is not None)], "The per_NB file uses normalised output units; it is not a separate optimisation run."),
             "shap": ("SHAP Analysis", [("Load SHAP_beeswarm_data.xlsx", shap() is not None)], "SHAP generation is unavailable."),
             "pcp": ("PCPs", [("Load Pareto CSV (original or per_NB)", pcp() is not None), ("Run PCP analysis", pcp_selected() is not None)], "Set objective bounds, select representative solutions, inspect parallel coordinates and export your selection."),

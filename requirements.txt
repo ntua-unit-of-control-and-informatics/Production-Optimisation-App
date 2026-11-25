@@ -1,10 +1,7 @@
---index-url https://pypi.org/simple
---extra-index-url https://download.pytorch.org/whl/cpu
-
 shiny==1.9.0
 pandas>=2.0,<3
 numpy>=1.26,<3
 openpyxl>=3.1
 matplotlib>=3.8,<4
 py7zr>=1.0,<2
-torch==2.10.0+cpu
+torch @ https://download.pytorch.org/whl/cpu/torch-2.10.0%2Bcpu-cp311-cp311-manylinux_2_28_x86_64.whl

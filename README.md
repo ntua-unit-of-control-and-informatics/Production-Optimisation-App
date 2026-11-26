@@ -7,9 +7,10 @@ interpretability and Pareto solution analysis.
 The application is available in two formats: a Shiny web application and a
 standalone Windows desktop application.
 
-## Shiny Web Application — v0.1 <a href="https://01a212b3-bba7-53ad-74d3-72f73ff5b453.share.connect.posit.cloud">
+<h2> ## Shiny Web Application — v0.1 
+<a href="https://01a212b3-bba7-53ad-74d3-72f73ff5b453.share.connect.posit.cloud">
 <img src="shiny_logo.png" width="50" height="50" align="absmiddle" alt="Launch Shiny App">
-</a>
+</a> </h2>
 
 The Shiny application can be accessed directly through a web browser without
 requiring any local installation. Click the Shiny logo above to launch the app.

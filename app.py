@@ -101,6 +101,8 @@ def table_view(df, limit=200):
 
 
 app_ui = ui.page_fluid(
+    ui.tags.script("""document.addEventListener('change', function(e){const el=e.target; if(!el.matches('.vg-role select'))return; const box=el.closest('.vg-role');box.classList.remove('decision','maximize','minimize');box.classList.add(['maximize','minimize'].includes(el.value.toLowerCase())?el.value.toLowerCase():'decision');});"""),
+    ui.tags.style('\n.vg-editor {background:#fff;border:1px solid #d5e3f5;border-radius:12px;padding:12px;}\n.vg-heading {font-weight:700;color:#1746bc;margin:0 0 12px;}\n.vg-card {border:1px solid #dce5ef;border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#fff;}\n.vg-card:last-child {margin-bottom:0;}\n.vg-top {display:grid;grid-template-columns:24px 120px minmax(160px,1fr) minmax(185px, .9fr) 150px;align-items:center;gap:8px;}\n.vg-editor .shiny-input-container {width:100%!important;margin:0!important;}\n.vg-editor .form-group,.vg-editor .form-check {margin:0!important;}\n.vg-field,.vg-bounds {display:flex;align-items:center;gap:8px;}\n.vg-name input {font-weight:700;background:white!important;border-color:transparent!important;padding:3px 4px;}\n.vg-name input:focus {border-color:#93b4d8!important;}\n.vg-units {font-size:13px;color:#718096;padding-left:4px;}\n.vg-role select {font-weight:700;text-align:center;border-radius:12px;}\n.vg-role.decision select {background-color:#dbeafe!important;color:#1746bc;border-color:#93c5fd;}\n.vg-role.maximize select {background-color:#dcfce7!important;color:#166534;border-color:#86efac;}\n.vg-role.minimize select {background-color:#fee2e2!important;color:#991b1b;border-color:#fecaca;}\n.vg-bounds {justify-content:flex-end;margin-top:8px;padding-right:158px;}\n.vg-bounds .shiny-input-container {width:120px!important;}\n.vg-footer {display:flex;justify-content:center;gap:8px;width:100%;}\n.modal-footer:has(.vg-footer) {justify-content:center;}\n.modal-dialog:has(.vg-editor) {max-width:min(1120px,calc(100vw - 32px));}\n@media(max-width:850px){.vg-top{grid-template-columns:24px 120px minmax(0,1fr);}.vg-field{grid-column:2 / -1;}.vg-bounds{padding-right:0;flex-wrap:wrap;justify-content:flex-start;}}\n'),
     ui.tags.style('body {font-family: \'Segoe UI\',Arial,sans-serif; background:#f5f8fc; color:#20324d;}\n.app-shell {max-width: 1580px; margin:auto; padding:18px 26px 70px;}\n.top-header {display:flex; justify-content:space-between; align-items:center; gap:20px; background:linear-gradient(120deg,#e8f3ff,#f6faff); padding:22px 26px; border:1px solid #c9def5; border-radius:12px; margin-bottom:14px;}\n.app-heading h1 {font-size:27px; font-weight:750; color:#14346c; margin:0 0 6px;}\n.app-heading p {margin:0; color:#536b89;}\n.status-pill {white-space:nowrap; color:#19613c; font-weight:600;}\n.workflow {display:flex; gap:13px; flex-wrap:wrap; padding:14px 20px; border:1px solid #cddff1; background:white; border-radius:9px; margin-bottom:12px; color:#345c91; font-weight:600;}\n.case-accordion {margin-bottom:14px;}\n.main-tabs {background:white; border-radius:10px;}\n.main-tabs .nav-tabs {border-bottom:2px solid #7ba8d8; background:#eef5fd; padding:8px 8px 0; gap:4px;}\n.main-tabs .nav-link {font-weight:650; color:#335a8e; border:1px solid #c7d9ef; border-bottom:0; background:#e8f1fc;}\n.main-tabs .nav-link.active {color:#14346c; background:white; border-color:#7ba8d8;}\n.main-tabs .tab-content {padding:18px 20px 35px;}\n.step-heading {padding:18px 22px; background:#edf5ff; border:1px solid #d3e5f9; border-radius:10px; margin-bottom:15px;}\n.step-heading h2 {font-size:23px; color:#14346c; font-weight:700; margin:0 0 8px;}\n.step-heading p {margin:0;color:#4e6483;}\n.section-card {background:white; border:1px solid #d5e2ef; border-radius:10px; box-shadow:0 3px 14px #142a4d0b; padding:18px 20px; margin-bottom:15px;}\n.card-title {font-size:17px; color:#1c457c; font-weight:700; margin:0 0 13px;}\n.btn-action {background:#20834c !important; color:white !important; border:0 !important;}\n.btn-other {background:#7550a5 !important; color:white !important; border:0 !important;}\n.btn-locked {border:1px solid #b8c4d4; color:#8591a3; background:#e8ecf2; border-radius:6px; padding:8px 13px; margin:5px 8px 8px 0; cursor:not-allowed;}\n.button-row {display:flex; gap:12px; margin-bottom:16px;}\n.floating-help {position:fixed !important; right:26px; bottom:24px; width:54px; height:54px; border-radius:50% !important; padding:0 !important; display:flex; align-items:center; justify-content:center; font-size:27px; font-weight:800; color:white !important; background:#d62828 !important; border:3px solid white !important; box-shadow:0 4px 15px #0003; z-index:1050;}\n.help-done,.help-pending {padding:11px 14px; border-radius:8px; margin:8px 0;}\n.help-done {background:#dcfce7; color:#166534;}.help-pending {background:#f1f5f9; color:#334155;}\n.hint {color:#596a7f; font-size:14px; margin-top:12px;}\n@media(max-width:700px){.app-shell{padding:10px 10px 70px}.top-header{flex-direction:column;align-items:start}.workflow{gap:7px}.main-tabs .tab-content{padding:12px 8px}.floating-help{right:15px;bottom:15px}}\n\n/* Desktop-inspired workflow map (responsive, no images or JS needed) */\n.workflow-graphic{background:#fafafa;border:1px solid #e7eaf0;border-radius:12px;padding:28px 30px 24px;margin-bottom:16px;color:#34465b;}\n.wf-diagram{display:flex;align-items:center;gap:24px;min-height:165px;flex-wrap:wrap;margin-bottom:14px;}\n.wf-step{display:inline-flex;flex-shrink:0;align-items:center;gap:12px;min-width:156px;min-height:62px;padding:12px 14px;border:2px solid #dadada;background:#f1f1f1;border-radius:10px;box-shadow:0 3px 5px #00000012;font-weight:700;color:#1b2634;}\n.wf-active{background:#337ec4;border-color:#337ec4;color:white;}\n.wf-num{display:inline-flex;justify-content:center;align-items:center;min-width:33px;height:33px;padding:0 6px;background:#bdbdbd;border-radius:7px;color:white;font-weight:750;font-size:19px;}\n.wf-num-active{background:#053c84;}\n.wf-arrow{font-size:29px;font-weight:300;color:#b6b6b6;}\n.wf-fork{position:relative;display:flex;flex-direction:column;gap:20px;margin-left:30px;padding-left:56px;border-left:3px solid #bcbcbc;}\n.wf-branch{position:relative;display:flex;align-items:center;gap:25px;min-height:62px;}\n.wf-branch::before{content:"";position:absolute;left:-56px;top:50%;width:36px;border-top:3px solid #bcbcbc;}\n.wf-fork::before{content:"";position:absolute;top:50%;left:-48px;width:48px;border-top:2px solid #bcbcbc;}\n.wf-guide{border-left:4px solid #2682ef;padding:5px 0 5px 22px;margin:14px 0 18px;line-height:1.55;}\n.wf-symbol-title{font-weight:650;margin:10px 0;}\n.wf-symbol{margin:12px 0;}\n@media(max-width:900px){.workflow-graphic{padding:16px}.wf-diagram{gap:12px}.wf-step{min-width:125px}.wf-fork{margin-left:12px;padding-left:25px}.wf-branch::before{left:-25px;width:16px}.wf-fork::before{left:-40px;width:15px}}\n@media(max-width:650px){.wf-diagram{display:grid;grid-template-columns:1fr;gap:10px}.wf-arrow{display:none}.wf-fork{margin:0 0 0 14px;padding-left:16px;gap:10px}.wf-fork::before{display:none}.wf-branch{flex-wrap:wrap}.wf-branch::before{left:-16px;width:10px}.wf-step{min-height:52px}.wf-branch-bottom>.wf-arrow{display:none}}\n'),
     ui.tags.style("""
     .shiny-input-container .input-group-btn .btn, .shiny-input-container .input-group .btn-file {background:#68737f!important;color:white!important;border-color:#68737f!important;}
@@ -118,6 +120,8 @@ app_ui = ui.page_fluid(
 
     """),
     ui.tags.style(".floating-help{top:18px !important;bottom:auto !important;right:18px !important;} .top-header{padding-right:85px;} .frozen-controls{opacity:.72;} .preview-progress{height:12px;width:100%;}"),
+    ui.tags.style(""".modal .modal-dialog {margin-top: 16px; margin-bottom: 16px; min-height: 0;} .modal .modal-content {max-height: calc(100dvh - 32px); display:flex; flex-direction:column;} .modal .modal-body {overflow-y:auto; min-height:0;} .modal .modal-header, .modal .modal-footer {flex-shrink:0;}"""),
+    ui.tags.script("""document.addEventListener('shown.bs.modal', function(e) { const m=e.target; m.scrollTop=0; const b=m.querySelector('.modal-body'); if(b) b.scrollTop=0; });"""),
     ui.tags.style(".modal-content{border:2px solid #93b4d8;border-radius:14px;box-shadow:0 12px 36px #183c6226}.modal-title{font-weight:700;text-align:center;width:100%}.pcp-interactive svg{width:100%;height:auto}.pcp-interactive [id^=pcpline] path{cursor:pointer;pointer-events:stroke}.pcp-interactive [id^=pcpline]:hover path{stroke-width:4!important}"),
     ui.div(
         ui.div(ui.h1("Production Optimisation App"),
@@ -156,7 +160,7 @@ app_ui = ui.page_fluid(
             card("Variable selection and settings",
                  ui.p("Review the detected columns. Domain creation uses the selected variable roles and observed bounds."),
                  ui.output_data_frame("variable_preview"),
-                 ui.p("Click a variable row to edit its name, type, objective, bounds and display precision.", class_="hint"),
+                 ui.div(ui.input_action_button("edit_inputs", "Edit Inputs", class_="btn-option"), ui.input_action_button("edit_outputs", "Edit Outputs", class_="btn-option"), class_="button-row"),
                  ui.output_text("variable_status")),
             card("Domain options",
                  ui.div(ui.input_action_button("create_domain", "Create Domain", class_="btn-action"),
@@ -292,7 +296,7 @@ app_ui = ui.page_fluid(
     ui.tags.style('body {--bs-body-font-size:17px;} .form-control,.form-select,.selectize-input,.selectize-dropdown {font-size:16px!important;} #workflow_help.floating-help {position:fixed!important;top:18px!important;right:18px!important;bottom:auto!important;width:54px!important;height:54px!important;min-height:54px!important;padding:0!important;display:flex;align-items:center;justify-content:center;font-size:27px!important;font-weight:800;color:white!important;background:#d62828!important;border:3px solid white!important;border-radius:50%!important;box-shadow:0 4px 15px #0003!important;z-index:1050;}'),
     ui.tags.script("\n    document.addEventListener('click', async e => {\n      const button=e.target.closest('#pcp_download_plot');\n      if(!button)return;\n      const box=document.querySelector('.pcp-interactive'), tip=box?.querySelector('.pcp-tip'), svg=box?.querySelector('svg');\n      if(!svg||!tip||getComputedStyle(tip).display==='none')return;\n      e.preventDefault();e.stopImmediatePropagation();\n      try {\n        const r=svg.getBoundingClientRect(), t=tip.getBoundingClientRect(), b=box.getBoundingClientRect();\n        const left=Math.min(0,t.left-r.left), top=Math.min(0,t.top-r.top-20), right=Math.max(r.width,t.right-r.left), bottom=Math.max(r.height,t.bottom-r.top);\n        const scale=2.5, canvas=document.createElement('canvas');canvas.width=Math.ceil((right-left)*scale);canvas.height=Math.ceil((bottom-top)*scale);\n        const ctx=canvas.getContext('2d');ctx.scale(scale,scale);ctx.translate(-left,-top);ctx.fillStyle='white';ctx.fillRect(left,top,right-left,bottom-top);\n        const clone=svg.cloneNode(true);clone.setAttribute('xmlns','http://www.w3.org/2000/svg');clone.setAttribute('width',r.width);clone.setAttribute('height',r.height);clone.style.width=r.width+'px';clone.style.height=r.height+'px';\n        const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)],{type:'image/svg+xml;charset=utf-8'}));\n        try {const img=new Image();img.src=url;await img.decode();ctx.drawImage(img,0,0,r.width,r.height);} finally {URL.revokeObjectURL(url);}\n        const x=t.left-r.left,y=t.top-r.top;\n        if(box.dataset.pinned){ctx.strokeStyle='#475569';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(b.left-r.left+Number(box.dataset.ax),b.top-r.top+Number(box.dataset.ay));ctx.lineTo(x+t.width/2,y+t.height/2);ctx.stroke();}\n        ctx.fillStyle='white';ctx.strokeStyle='#93b4d8';ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,t.width,t.height,10);else ctx.rect(x,y,t.width,t.height);ctx.fill();ctx.stroke();\n        const chip=tip.querySelector('.pcp-solution-chip');if(chip){const q=chip.getBoundingClientRect();ctx.fillStyle='#245d99';ctx.beginPath();ctx.ellipse(q.left-r.left+q.width/2,q.top-r.top+q.height/2,q.width/2,q.height/2,0,0,2*Math.PI);ctx.fill();}\n        const walker=document.createTreeWalker(tip,NodeFilter.SHOW_TEXT);let node;\n        while(node=walker.nextNode()){\n          const style=getComputedStyle(node.parentElement);ctx.font=`${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;ctx.fillStyle=style.color;ctx.textBaseline='middle';\n          // Draw each rendered line at its actual browser position, including wrapping.\n          let start=0, prev=null, str='';const range=document.createRange();\n          const flush=()=>{if(prev&&str)ctx.fillText(str,prev.left-r.left,prev.top-r.top+prev.height/2);};\n          for(let i=0;i<node.length;i++){range.setStart(node,i);range.setEnd(node,i+1);const q=range.getBoundingClientRect();if(!q.width){flush();prev=null;str='';continue;}if(prev&&Math.abs(q.top-prev.top)>1){flush();prev=null;str='';}if(!prev)prev=q;str+=node.textContent[i];}flush();\n        }\n        canvas.toBlob(blob=>{if(!blob)return;const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='pcp_plot.png';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);},'image/png');\n      } catch(err){console.error(err);alert('Could not export the annotated plot. Please retry.');}\n    },true);\n"),
     ui.tags.style("""
-    .pcp-tip .pcp-solution-chip {position:absolute;top:-17px;left:50%;transform:translateX(-50%);min-width:34px;height:34px;padding:0 8px;display:flex;align-items:center;justify-content:center;border-radius:99px;background:#245d99;color:white;border:2px solid white;font-size:15px;font-weight:750;box-shadow:0 2px 5px #17345133;}
+    .pcp-tip .pcp-solution-chip {position:absolute;top:-17px;left:50%;transform:translateX(-50%);min-width:34px;height:34px;padding:0 8px;display:flex;align-items:center;justify-content:center;border-radius:99px;background:#245d99;color:white;border:2px solid white;font-size:inherit;font-weight:750;box-shadow:0 2px 5px #17345133;}
     .pcp-tip {padding-top:24px!important;}
     #pcp_legend + .selectize-control .item {border-radius:99px!important;background:#e8f2ff!important;color:#245d99!important;padding:4px 9px!important;}
     #main_tab .nav-link, .main-tabs .nav-tabs .nav-link {font-size:19px!important;}
@@ -337,7 +341,9 @@ def server(input, output, session):
     for upload_id in ("experimental", "domain_file", "emulator_zip", "ts_files", "shap_file", "pcp_file"):
         register_filename(upload_id)
     pcp_padding = reactive.value((.35, .275))
-    pcp_size = reactive.value((19, 9))
+    pcp_size = reactive.value((22, 12))
+    pcp_annotation_font = reactive.value(10)
+    pcp_plot_font = reactive.value(14)
     pcp_decimal_settings = reactive.value({})
 
     @reactive.calc
@@ -432,63 +438,79 @@ def server(input, output, session):
         for col, edits in variable_overrides.get().items():
             match = result["Original Column"] == col
             for key, val in edits.items():
-                result.loc[match, key] = val
+                if key != "Previous Role":
+                    result.loc[match, key] = val
         return result
 
-    selected_variable = reactive.value(None)
+    editing_variables = reactive.value([])
 
-    @reactive.effect
-    @reactive.event(input.variable_preview_selected_rows)
-    def _open_variable_editor():
-        selection = input.variable_preview_selected_rows()
+    def open_variable_group(outputs):
         df = variables()
-        if df is None or not selection or selection[0] >= len(df):
+        if df is None or df.empty:
+            ui.notification_show("Load experimental data first.", type="warning")
             return
-        row = df.iloc[selection[0]]
-        original = str(row["Original Column"])
-        selected_variable.set(original)
-        def bound_string(v):
-            return "" if pd.isna(v) else str(v)
-        ui.modal_show(ui.modal(
-            ui.p("Edit the selected variable. Changes are applied when you click Save changes."),
-            ui.input_text("edit_name", "Display name", value=str(row["Display Name"])),
-            ui.layout_columns(
-                ui.input_select("edit_role", "Variable role / objective", choices=["Decision", "Maximize", "Minimize", "Ignore"], selected=str(row["Role"])),
-                ui.input_select("edit_type", "Variable type", choices=["Continuous", "Categorical"], selected=str(row["Type"])),
-                col_widths=(6, 6)),
-            ui.layout_columns(
-                ui.input_text("edit_lower", "Lower bound", value=bound_string(row["Lower Bound"])),
-                ui.input_text("edit_upper", "Upper bound", value=bound_string(row["Upper Bound"])),
-                col_widths=(6, 6)),
-            ui.input_select("edit_decimals", "Display decimal places", choices={str(i): str(i) for i in range(0, 11)}, selected=str(int(row["Decimals"]))),
-            title=f"Variable settings — {row['Display Name']}",
-            easy_close=True,
-            footer=ui.div(ui.modal_button("Cancel"), ui.input_action_button("apply_variable", "Save changes", class_="btn-action"), class_="button-row")
-        ))
+        roles = df["Role"].where(df["Role"].str.lower() != "ignore", df["Original Column"].map(lambda c: variable_overrides.get().get(c, {}).get("Previous Role", infer_role(c, data()))))
+        mask = roles.str.lower().isin(["maximize", "minimize"])
+        rows = df.loc[mask if outputs else ~mask]
+        if rows.empty:
+            ui.notification_show("No variables in this group.", type="warning")
+            return
+        editing_variables.set(rows["Original Column"].tolist())
+        controls = []
+        for j, (idx, row) in enumerate(rows.iterrows()):
+            prefix = f"vg_{j}_"
+            role = str(roles.loc[idx])
+            name = str(row["Display Name"])
+            units_match = re.search(r"\(([^()]*)\)\s*$", display_name(row["Original Column"]))
+            units = units_match.group(1) if units_match else "N/A"
+            role_class = "maximize" if role == "Maximize" else "minimize" if role == "Minimize" else "decision"
+            controls.append(ui.div(
+                ui.div(
+                    ui.div(ui.input_checkbox(prefix+"keep", None, value=str(row["Role"]).lower() != "ignore"), class_="vg-keep"),
+                    ui.div(ui.input_select(prefix+"role", None, ["Decision", "Categorical", "Maximize", "Minimize"], selected=role), class_=f"vg-role {role_class}"),
+                    ui.div(ui.input_text(prefix+"name", None, display_name(name)), ui.div("Units: " + units, class_="vg-units"), class_="vg-name"),
+                    ui.div(ui.span("Type:"), ui.input_select(prefix+"type", None, ["Continuous", "Categorical"], selected=str(row["Type"])), class_="vg-field"),
+                    ui.div(ui.span("Decimals:"), ui.input_numeric(prefix+"digits", None, int(row["Decimals"]), min=0, max=10), class_="vg-field vg-digits"),
+                    class_="vg-top"),
+                ui.panel_conditional(f"(input.{prefix}role === 'Decision' || input.{prefix}role === 'Categorical') && input.{prefix}type !== 'Categorical'",
+                    ui.div(ui.span("Bounds:"), ui.span("Low"), ui.input_text(prefix+"low", None, "" if pd.isna(row["Lower Bound"]) else str(row["Lower Bound"])), ui.span("High"), ui.input_text(prefix+"high", None, "" if pd.isna(row["Upper Bound"]) else str(row["Upper Bound"])), class_="vg-bounds")),
+                class_="vg-card"))
+        ui.modal_show(ui.modal(ui.div(ui.div("Objectives" if outputs else "Inputs", class_="vg-heading"), *controls, class_="vg-editor"), title="Edit Outputs" if outputs else "Edit Inputs", size="xl", easy_close=False,
+            footer=ui.div(ui.modal_button("Cancel"), ui.input_action_button("apply_variable_group", "Apply", class_="btn-action"), class_="vg-footer")))
 
     @reactive.effect
-    @reactive.event(input.apply_variable)
-    def _apply_variable():
-        selected = selected_variable.get()
-        if not selected:
-            return
-        def bound(value):
-            value = str(value or "").strip()
-            return float(value) if value else np.nan
-        try:
-            lower, upper = bound(input.edit_lower()), bound(input.edit_upper())
-            if np.isfinite(lower) and np.isfinite(upper) and lower > upper:
-                raise ValueError("Lower bound must not exceed upper bound.")
-        except ValueError as exc:
-            ui.notification_show(f"Invalid bounds: {exc}", type="error")
-            return
+    @reactive.event(input.edit_inputs)
+    def _edit_inputs():
+        open_variable_group(False)
+
+    @reactive.effect
+    @reactive.event(input.edit_outputs)
+    def _edit_outputs():
+        open_variable_group(True)
+
+    @reactive.effect
+    @reactive.event(input.apply_variable_group)
+    def _apply_variable_group():
         updated = dict(variable_overrides.get())
-        updated[selected] = {"Display Name": input.edit_name().strip() or selected,
-                             "Role": input.edit_role(), "Type": input.edit_type(),
-                             "Lower Bound": lower, "Upper Bound": upper,
-                             "Decimals": int(input.edit_decimals())}
+        try:
+            for j, col in enumerate(editing_variables.get()):
+                p = f"vg_{j}_"
+                def bound(key):
+                    v = str(input[p+key]() or "").strip()
+                    if not v: return np.nan
+                    x = float(v)
+                    if not np.isfinite(x): raise ValueError("Bounds must be finite.")
+                    return x
+                lo, hi = bound("low"), bound("high")
+                if lo > hi: raise ValueError(f"Lower bound exceeds upper bound for {col}.")
+                digits = int(input[p+"digits"]())
+                if not 0 <= digits <= 10: raise ValueError("Decimals must be between 0 and 10.")
+                updated[col] = {"Display Name": input[p+"name"]().strip() or col, "Role": input[p+"role"]() if input[p+"keep"]() else "Ignore", "Previous Role": input[p+"role"](), "Type": input[p+"type"](), "Lower Bound": lo, "Upper Bound": hi, "Decimals": digits}
+        except (ValueError, TypeError) as exc:
+            ui.notification_show(str(exc), type="error")
+            return
         variable_overrides.set(updated)
-        variable_message.set(f"Saved settings for {updated[selected]['Display Name']}.")
+        variable_message.set("Variable settings applied. Create Domain to refresh the domain table.")
         ui.modal_remove()
 
     @render.text
@@ -907,7 +929,7 @@ def server(input, output, session):
         v=v.copy()
         for c in ("Lower Bound", "Upper Bound"):
             v[c]=["" if pd.isna(x) else f"{x:.{int(d)}f}" for x,d in zip(v[c],v["Decimals"])]
-        return render.DataGrid(clean_variable_view(v.drop(columns=["Original Column"], errors="ignore")), filters=False, selection_mode="row")
+        return render.DataGrid(clean_variable_view(v.drop(columns=["Original Column"], errors="ignore")), filters=False)
 
     @render.data_frame
     def domain_preview():
@@ -951,11 +973,33 @@ def server(input, output, session):
             return None
         return next((c for c in cols if str(c).lower().startswith(stem) and len(stem) > 2), None)
 
+    def pcp_metadata(df):
+        def first(key):
+            if key not in df: return ""
+            return next((str(v).strip() for v in df[key].dropna() if str(v).strip()), "")
+        names = [v.strip() for v in first("__pcp_objective_names__").split(",") if v.strip()]
+        directions = {}
+        for part in first("__pcp_objective_directions__").split(","):
+            if ":" in part:
+                name, direction = part.rsplit(":", 1)
+                direction = direction.strip().lower()
+                if direction not in ("max", "maximize", "min", "minimize"):
+                    raise ValueError(f"Invalid objective direction: {part}")
+                directions[name.strip()] = "Maximize" if direction.startswith("max") else "Minimize"
+        if any(c not in df.columns for c in names):
+            raise ValueError("Pareto objective metadata references missing columns.")
+        if not names and directions: names = list(directions)
+        if any(c not in df.columns for c in names):
+            raise ValueError("Pareto direction metadata references missing columns.")
+        return names, directions
+
     @reactive.calc
     def pcp_objectives():
         df = pcp_source()
         if df is None:
             return []
+        names, _ = pcp_metadata(df)
+        if names: return names
         cols = [c for c in df.columns if not is_pcp_helper(c)
                 and pd.to_numeric(df[c], errors="coerce").notna().any()]
         # Prefer explicit roles from the experimental data/domain, matching renamed
@@ -981,6 +1025,10 @@ def server(input, output, session):
         return chosen
 
     def pcp_direction(col):
+        source = pcp_source()
+        if source is not None:
+            names, directions = pcp_metadata(source)
+            if col in directions: return directions[col]
         for settings in (variables(), domain()):
             if settings is None or "Role" not in settings.columns:
                 continue
@@ -992,14 +1040,19 @@ def server(input, output, session):
         return "Minimize" if any(k in str(col).lower() for k in ("cost", "co2", "emission", "energy")) else "Maximize"
 
     def pcp_norm(df, objectives):
-        result = np.empty((len(df),len(objectives)))
+        # Desktop convention: zero is ideal, one is worst.
+        source = pcp_source()
+        if source is None: source = df
+        result = np.zeros((len(df), len(objectives)))
         for j,c in enumerate(objectives):
-            x = pd.to_numeric(df[c],errors="coerce").to_numpy(dtype=float)
-            valid = np.isfinite(x)
-            lo,hi = (np.nanmin(x[valid]),np.nanmax(x[valid])) if valid.any() else (0.,1.)
-            norm = np.clip((x-lo)/(hi-lo),0,1) if hi>lo else np.full(len(x),.5)
-            if pcp_direction(c)=="Minimize": norm = 1-norm
-            result[:,j] = np.nan_to_num(norm,nan=.5)
+            ref = pd.to_numeric(source[c], errors="coerce").to_numpy(float)
+            x = pd.to_numeric(df[c], errors="coerce").to_numpy(float)
+            if not np.isfinite(ref).all() or not np.isfinite(x).all():
+                raise ValueError(f"Non-finite objective values: {c}")
+            lo, hi = ref.min(), ref.max()
+            if not np.isclose(hi, lo):
+                z = (x-lo)/(hi-lo)
+                result[:,j] = 1-z if pcp_direction(c)=="Maximize" else z
         return result
 
     @reactive.effect
@@ -1011,6 +1064,8 @@ def server(input, output, session):
             df = read_csv(input.pcp_file())
             if df is None or df.empty:
                 raise ValueError("No Pareto points found.")
+            df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
+            pcp_metadata(df)
             pareto_state.set(df)
             pcp_message.set("Pareto file loaded. Existing objective bounds are retained; review them before running PCP.")
         except Exception as exc:
@@ -1107,24 +1162,37 @@ def server(input, output, session):
         return df.loc[mask].copy()
 
     def pcp_select(df,n):
-        objectives=pcp_objectives()
-        if df is None or df.empty or not objectives: return df
-        norm=pcp_norm(df,objectives)
-        # Start closest to the ideal (utopia), then greedily cover the remaining
-        # objective space with maximally separated solutions.
-        dist=np.linalg.norm(1-norm,axis=1)
-        selected=[int(np.argmin(dist))]
-        mindist=np.linalg.norm(norm-norm[selected[0]],axis=1)
-        for _ in range(min(max(1,n),len(df))-1):
-            mindist[selected]=-1
-            nxt=int(np.argmax(mindist))
+        objectives = pcp_objectives()
+        if not objectives: raise ValueError("No objective columns found.")
+        norm = pcp_norm(df, objectives)
+        # Same Monte Carlo sequence as desktop when seeded with 42.
+        mc = np.random.RandomState(42).rand(100000, len(objectives))*1.1
+        # Packed masks bound memory to 12.5 KB per candidate.
+        masks = np.empty((len(df), 12500), dtype=np.uint8)
+        for i, point in enumerate(norm):
+            masks[i] = np.packbits(np.all(point <= mc, axis=1))
+        counts = np.array([i.bit_count() for i in range(256)], dtype=np.uint8)
+        baseline = int(counts[np.bitwise_or.reduce(masks, axis=0)].sum())
+        covered = np.zeros(12500, dtype=np.uint8)
+        available = np.ones(len(df), dtype=bool)
+        selected = []
+        for _ in range(min(max(1,n),len(df))):
+            gains = np.full(len(df), -1, dtype=np.int64)
+            for start in range(0,len(df),128):
+                stop = min(start+128,len(df))
+                gains[start:stop] = counts[masks[start:stop] & ~covered].sum(axis=1)
+            gains[~available] = -1
+            nxt = int(np.argmax(gains))
             selected.append(nxt)
-            mindist=np.minimum(mindist,np.linalg.norm(norm-norm[nxt],axis=1))
-            mindist[selected]=-1
-        result=df.iloc[selected].copy()
-        result.insert(0,"Row #",df.index.to_numpy()[selected]+1)
-        result["Utopia distance"]=dist[selected]
-        return result
+            available[nxt] = False
+            covered |= masks[nxt]
+        coverage = 100*int(counts[covered].sum())/baseline if baseline else 0.
+        result = df.iloc[selected].copy()
+        result["Row #"] = np.asarray(selected)+1
+        result["Utopia distance"] = np.linalg.norm(norm[selected],axis=1)
+        result["__pcp_pcp_hv_coverage_percent__"] = coverage
+        result = result[["Row #"]+[c for c in result.columns if c != "Row #"]]
+        return result.sort_values("Utopia distance", kind="stable"), coverage
 
     @reactive.effect
     @reactive.event(input.pcp_run)
@@ -1133,14 +1201,14 @@ def server(input, output, session):
         if df is None or df.empty:
             ui.notification_show("Load a Pareto CSV in PCP first.",type="error")
             return
-        eligible = pcp_filtered(df)
-        if eligible.empty:
+        try:
+            chosen, coverage = pcp_select(df,int(input.pcp_n() or 5))
+            pcp_selected_state.set(chosen)
+            pcp_message.set(f"PCP analysis complete: {len(chosen)} representative solutions selected from {len(df)} Pareto points. Hypervolume coverage: {coverage:.2f}%.")
+        except Exception as exc:
             pcp_selected_state.set(None)
-            pcp_message.set(f"Loaded {len(df)} Pareto points, but none satisfy the current objective bounds. Review or clear bounds in Objective bounds & display settings.")
-            return
-        chosen=pcp_select(eligible,int(input.pcp_n() or 5))
-        pcp_selected_state.set(chosen)
-        pcp_message.set(f"PCP analysis complete: {len(chosen)} representative solutions selected from {len(df)} Pareto points.")
+            pcp_message.set(f"PCP analysis failed: {exc}")
+            ui.notification_show(str(exc), type="error")
 
     @render.text
     def pcp_status():
@@ -1176,19 +1244,7 @@ def server(input, output, session):
             except Exception: continue
             if val and val!="__all__": df=df[df[c].astype(str)==val]
         if "Utopia distance" not in df.columns:
-            objectives = [c for c in pcp_objectives() if c in df.columns]
-            if objectives:
-                source = pcp_source()
-                if source is None: source = df
-                norm = np.empty((len(df), len(objectives)))
-                for j, c in enumerate(objectives):
-                    ref = pd.to_numeric(source[c] if c in source else df[c], errors="coerce")
-                    vals = pd.to_numeric(df[c], errors="coerce")
-                    lo, hi = ref.min(), ref.max()
-                    z = np.clip((vals-lo)/(hi-lo), 0, 1) if hi > lo else np.full(len(df), .5)
-                    if pcp_direction(c) == "Minimize": z = 1-z
-                    norm[:, j] = np.nan_to_num(z, nan=.5)
-                df["Utopia distance"] = np.linalg.norm(1-norm, axis=1)
+            df["Utopia distance"] = np.linalg.norm(pcp_norm(df, pcp_objectives()),axis=1)
         return df.drop(columns=[c for c in df.columns if is_pcp_helper(c) and c != "Row #" and c != "Utopia distance"], errors="ignore")
 
     def pcp_utopia_point():
@@ -1232,13 +1288,17 @@ def server(input, output, session):
         ui.modal_show(ui.modal(ui.div(ui.input_slider("pcp_width", "Width (inches)", 8, 24, w, step=.5),
             ui.input_slider("pcp_height", "Height (inches)", 3, 12, h, step=.5),
             ui.input_slider("pcp_xpad", "Horizontal padding (axis units)", 0, 1, pcp_padding.get()[0], step=.05),
-            ui.input_slider("pcp_ypad", "Vertical padding (normalized units)", 0, .5, pcp_padding.get()[1], step=.025), class_="pcp-size-controls"),
+            ui.input_slider("pcp_ypad", "Vertical padding (normalized units)", 0, .5, pcp_padding.get()[1], step=.025),
+            ui.input_slider("pcp_font", "Annotation font size (pt)", 6, 24, pcp_annotation_font.get(), step=1),
+            ui.input_slider("pcp_plot_font", "Plot font size (pt)", 6, 32, pcp_plot_font.get(), step=1), class_="pcp-size-controls"),
             title="PCP plot dimensions", footer=ui.div(ui.input_action_button("pcp_size_apply", "Apply"), class_="pcp-size-footer"), easy_close=True))
 
     @reactive.effect
     @reactive.event(input.pcp_size_apply)
     def _apply_plot_size():
         pcp_size.set((float(input.pcp_width()), float(input.pcp_height())))
+        pcp_annotation_font.set(int(input.pcp_font()))
+        pcp_plot_font.set(int(input.pcp_plot_font()))
         pcp_padding.set((float(input.pcp_xpad()), float(input.pcp_ypad())))
         ui.modal_remove()
 
@@ -1258,12 +1318,18 @@ def server(input, output, session):
                 failed |= not ok
                 d = pcp_digits(c)
                 op = ("≥" if ok else "<") if key == "low" else ("≤" if ok else ">")
-                cells.append(ui.tags.td(ui.span("Missing" if pd.isna(v) else f"{v:.{d}f}", style=f"font-weight:700;color:{'#16803c' if ok else '#c62828'}"),
-                    f" {op} {b:.{d}f}" if pd.notna(v) else f" (required {'≥' if key=='low' else '≤'} {b:.{d}f})"))
+                text = f"{v:.{d}f} {op} {b:.{d}f}" if pd.notna(v) else f"Missing (required {b:.{d}f})"
+                cells.append(ui.tags.td(text, style=f"font-weight:700;color:{'#16803c' if ok else '#c62828'}"))
             if failed: rows.append(ui.tags.tr(ui.tags.td(str(row.get("Row #", i+1))), *cells))
-        headers = ["Solution"] + [f"{pcp_label(c)} ({'minimum' if key=='low' else 'maximum'})" for c,key,b in constraints]
-        content = ui.div(ui.tags.table(ui.tags.thead(ui.tags.tr(*[ui.tags.th(x) for x in headers])), ui.tags.tbody(*rows), class_="table", style="--bs-table-bg:white;--bs-table-striped-bg:white;"), style="overflow-x:auto;") if rows else ui.p("No selected solutions fail the current bounds." if df is not None else "No selected solutions loaded.")
-        ui.modal_show(ui.modal(content, title="Constraint failures", size="xl", easy_close=True))
+        headers = [ui.tags.th("Solution")]
+        for c,key,b in constraints:
+            label = pcp_label(c)
+            raw = str(c).replace("_", " ")
+            name = label.split(" (")[0]
+            units = raw[raw.find(" (")+1:] if " (" in raw else ("(" + label.split(" (",1)[1] if " (" in label else "")
+            headers.append(ui.tags.th(name, ui.tags.br(), units) if units else ui.tags.th(name))
+        content = ui.div(ui.tags.table(ui.tags.thead(ui.tags.tr(*headers)), ui.tags.tbody(*rows), class_="table", style="width:max-content;max-width:none;table-layout:auto;white-space:nowrap;margin:0 auto;--bs-table-bg:white;--bs-table-striped-bg:white;"), style="overflow-x:auto;") if rows else ui.p("No selected solutions fail the current bounds." if df is not None else "No selected solutions loaded.")
+        ui.modal_show(ui.modal(ui.tags.style(".modal-dialog:has(.pcp-failure-table){width:max-content;max-width:calc(100vw - 32px);margin-left:auto;margin-right:auto;} .pcp-failure-table{max-width:calc(100vw - 90px);}"), ui.div(content, class_="pcp-failure-table"), title="Constraint failures", size="xl", easy_close=True, footer=ui.modal_button("Close")))
 
     @render.data_frame
     def pcp_preview():
@@ -1290,22 +1356,16 @@ def server(input, output, session):
         source = pcp_source()
         if source is None: source = df
         cols = [c for c in pcp_objectives() if c in df]
-        norm = np.zeros((len(df),len(cols)))
-        for j,c in enumerate(cols):
-            ref = pd.to_numeric(source[c] if c in source else df[c],errors="coerce")
-            lo,hi = ref.min(),ref.max()
-            z = np.clip((pd.to_numeric(df[c],errors="coerce")-lo)/(hi-lo),0,1) if hi>lo else np.full(len(df),.5)
-            if pcp_direction(c)=="Minimize": z=1-z
-            norm[:,j]=np.nan_to_num(z,nan=.5)
-        dist=np.linalg.norm(1-norm,axis=1)
+        dist = np.linalg.norm(pcp_norm(df, cols),axis=1)
         if not len(dist): return []
-        t=(dist-dist.min())/(np.ptp(dist) or 1)
+        t=(dist-dist.min())/(1.0 if np.isclose(np.ptp(dist),0) else np.ptp(dist))
         return [to_hex((v,0,1-v)) for v in t]
 
     @render.ui
     def pcp_plot_view():
         df=pcp_selected()
         if df is None or df.empty: return ui.p("Run PCP Analysis or load a selected-solutions CSV to see the plot.")
+        df = pcp_plot_order(df)
         fig=pcp_figure(df)
         buf=io.StringIO()
         fig.savefig(buf, format="svg", bbox_inches="tight")
@@ -1318,17 +1378,23 @@ def server(input, output, session):
             for c,v in row.items():
                 if is_pcp_helper(c): continue
                 value = f"{v:.{pcp_digits(c)}f}" if isinstance(v,(int,float,np.number)) and pd.notna(v) else str(v)
+                if c in objectives:
+                    for std_col in (f"{c}_std", f"{c}_std_METADATA"):
+                        if std_col in row.index and pd.notna(row[std_col]):
+                            value += f" ± {float(row[std_col]):.{pcp_digits(c)}f}"
+                            break
                 entry["outputs" if c in objectives else "inputs"].append(f"{pcp_label(c)}: {value}")
             labels.append(entry)
-        return ui.div(ui.p("Hover over a line to inspect it. Click to pin; click again to unpin."), ui.HTML("<svg"+svg), ui.div(class_="pcp-leader", style="display:none;position:absolute;height:1px;background:#475569;transform-origin:left center;pointer-events:none;z-index:9;"), ui.div(class_="pcp-tip", style="font-family:inherit;font-size:12px;text-align:center;line-height:1.5;cursor:move;display:none;position:absolute;z-index:10;background:white;border:1px solid #93b4d8;border-radius:8px;padding:12px;pointer-events:none;white-space:pre-wrap;max-width:90%;"), class_="pcp-interactive", style=f"position:relative;width:{pcp_size.get()[0]*80:.0f}px;max-width:100%;", **{"data-labels":json.dumps(labels)})
+        return ui.div(ui.p("Hover over a line to inspect it. Click to pin; click again to unpin."), ui.HTML("<svg"+svg), ui.div(class_="pcp-leader", style="display:none;position:absolute;height:1px;background:#475569;transform-origin:left center;pointer-events:none;z-index:9;"), ui.div(class_="pcp-tip", style=f"font-family:inherit;font-size:{pcp_annotation_font.get()}pt;text-align:center;line-height:1.5;cursor:move;display:none;position:absolute;z-index:10;background:white;border:1px solid #93b4d8;border-radius:8px;padding:12px;pointer-events:none;white-space:pre-wrap;max-width:90%;"), class_="pcp-interactive", style=f"position:relative;width:{pcp_size.get()[0]*80:.0f}px;max-width:100%;", **{"data-labels":json.dumps(labels)})
+
+    def pcp_plot_order(df):
+        dist = np.linalg.norm(pcp_norm(df, pcp_objectives()), axis=1)
+        return df.iloc[np.argsort(dist)[::-1]]
 
     def pcp_figure(df):
         objectives=pcp_objectives()
         source=pcp_source()
         if source is None: source=df
-        if len([c for c in objectives if c in df.columns]) < 2:
-            objectives = [c for c in df.columns if not is_pcp_helper(c) and any(
-                k in str(c).lower() for k in ("yield", "co2", "cost", "emission"))]
         # PCP axes are only the optimization objectives, never metadata or decisions.
         cols=[c for c in objectives if c in df.columns]
         if len(cols)<2:
@@ -1336,8 +1402,9 @@ def server(input, output, session):
             ax.text(.5,.5,"At least two objective columns are required.",ha="center",va="center")
             ax.axis("off")
             return fig
+        font = pcp_plot_font.get()
         fig,ax=plt.subplots(figsize=pcp_size.get())
-        fig.subplots_adjust(left=.09,right=.88,bottom=.28,top=.89)
+        fig.subplots_adjust(left=.06,right=.94,bottom=.15,top=.94)
         x=np.arange(len(cols))
         values=np.zeros((len(df),len(cols)))
         for j,c in enumerate(cols):
@@ -1346,37 +1413,30 @@ def server(input, output, session):
                 refnum=pd.to_numeric(ref,errors="coerce")
                 lo,hi=refnum.min(),refnum.max()
                 val=pd.to_numeric(df[c],errors="coerce").to_numpy(dtype=float)
-                values[:,j]=np.clip((val-lo)/(hi-lo),0,1) if hi>lo else .5
+                values[:,j]=np.clip((val-lo)/(hi-lo),0,1) if not np.isclose(hi,lo) else .5
             else:
                 categories=sorted(ref.dropna().astype(str).unique())
                 codes={v:i for i,v in enumerate(categories)}
                 values[:,j]=[codes.get(str(v),0)/max(1,len(categories)-1) for v in df[c]]
         score_cols = [c for c in objectives if c in df.columns]
-        norm = np.zeros((len(df),len(score_cols)))
-        for k,c in enumerate(score_cols):
-            reference = pd.to_numeric(source[c] if c in source.columns else df[c],errors="coerce")
-            vals = pd.to_numeric(df[c],errors="coerce")
-            mn,mx = reference.min(),reference.max()
-            z = np.clip((vals-mn)/(mx-mn),0,1) if mx>mn else np.full(len(df),.5)
-            if pcp_direction(c)=="Minimize": z=1-z
-            norm[:,k]=np.nan_to_num(z,nan=.5)
-        dist=np.linalg.norm(1-norm,axis=1)
+        dist = np.linalg.norm(pcp_norm(df, score_cols),axis=1)
         # Match desktop app: best (closest to utopia) = blue, worst = red.
-        cvals = (dist-dist.min())/(np.ptp(dist) or 1)
-        color = np.column_stack([cvals, np.zeros_like(cvals), 1-cvals, np.full_like(cvals, .9)])
+        cvals = (dist-dist.min())/(1.0 if np.isclose(np.ptp(dist),0) else np.ptp(dist))
+        color = np.column_stack([cvals, np.zeros_like(cvals), 1-cvals, np.ones_like(cvals)])
         from matplotlib.lines import Line2D
-        cats = [c for c in (input.pcp_legend() or []) if c in df.columns]
+        cats = [c for c in df.columns if c in (input.pcp_legend() or [])]
         groups = [tuple(str(row[c]) for c in cats) for _,row in df.iterrows()]
         unique = list(dict.fromkeys(groups))
         markers = ['o','s','^','d','v','>','<','p','h','X','*']
         styles = ['-','--',':','-.']
         for i,row in enumerate(values):
             g = unique.index(groups[i])
-            ax.plot(x,row,color=color[i],alpha=.83,lw=1.6,gid=f"pcpline{i}", marker=markers[g%len(markers)] if cats else None, linestyle=styles[g%4] if cats else '-', markersize=5)
-        if cats:
-            ax.legend(handles=[Line2D([0],[0],color='#555',marker=markers[i%len(markers)],linestyle=styles[i%4],label=' + '.join(g)) for i,g in enumerate(unique)],loc="lower center",bbox_to_anchor=(.5,.015),ncol=min(4,len(unique)),fontsize=9,framealpha=.9)
-        for j,c in enumerate(cols):
-            ax.axvline(j,color="#cbd5e1",lw=.8,zorder=0)
+            ax.plot(x,row,color=color[i],alpha=.92,lw=2.2,gid=f"pcpline{i}", marker=markers[g%len(markers)], linestyle=styles[g%4] if cats else '-', markersize=7)
+        if unique:
+            leg = ax.legend(handles=[Line2D([0],[0],color='black',marker=markers[i%len(markers)],linestyle=styles[i%4],linewidth=1.6,markersize=7,label=' + '.join(g) if cats else 'Selected solutions') for i,g in enumerate(unique)],title=' + '.join(pcp_label(c) for c in cats) if cats else 'Selected Solutions',loc="lower center",bbox_to_anchor=(.5,.015),ncol=min(4,len(unique)),fontsize=font,title_fontsize=font,frameon=True)
+            leg.get_frame().set_facecolor("white")
+            leg.get_frame().set_edgecolor("#111827")
+            leg.get_frame().set_alpha(.92)
         # Draw bounds in raw units, mapped onto each objective's normalized axis.
         for j, c in enumerate(cols):
             entry = pcp_bound_settings.get().get(c, {})
@@ -1391,24 +1451,27 @@ def server(input, output, session):
                 ax.plot([j-.055,j+.055],[yy,yy],color="#374151",lw=1.6,ls=ls,zorder=8)
                 ax.annotate(f"{sign} {float(bound):.{pcp_digits(c)}f}", (j, yy),
                     xytext=(7 if j<len(cols)-1 else -7,0),textcoords="offset points",
-                    ha="left" if j<len(cols)-1 else "right",va="center",fontsize=9,
+                    ha="left" if j<len(cols)-1 else "right",va="center",fontsize=font,
                     bbox=dict(facecolor="white",edgecolor="#cbd5e1",alpha=.95,boxstyle="round,pad=.2"),zorder=9)
         labels=[f"{pcp_label(c).replace('(', chr(10)+'(')}\n[{pcp_direction(c)}]" for c in cols]
-        ax.set_xticks(x, labels, fontsize=10)
-        ax.set_yticks([0,1], ["Min", "Max"])
+        ax.set_xticks(x, labels, fontsize=font)
+        ax.set_yticks([0,1], ["Min", "Max"], fontsize=font)
         xp, yp = pcp_padding.get()
-        ax.set_xlim(-xp,len(cols)-1+xp);ax.set_ylim(-yp,1+yp)
-        ax.set_ylabel("Normalized Scale")
-        ax.set_title(f"Parallel coordinates — {len(df)} selected solutions")
-        ax.grid(axis="y",alpha=.18)
+        ax.set_xlim(-max(.01,xp),len(cols)-1+max(.01,xp));ax.set_ylim(-yp,1+yp)
+        ax.set_ylabel("Normalized Scale", fontsize=font)
+        coverage = df["__pcp_pcp_hv_coverage_percent__"].iloc[0]
+        ax.set_title(f"Pareto-Optimal Subset (N={len(df)}), PCP HV Coverage: {coverage:.2f}%", fontsize=font+4)
+        ax.grid(True,alpha=.3)
         from matplotlib.cm import ScalarMappable
         from matplotlib.colors import Normalize
         from matplotlib.colors import ListedColormap
         gradient = np.linspace(0,1,256)
         blue_to_red = ListedColormap(np.column_stack([gradient,np.zeros(256),1-gradient]))
         sm=ScalarMappable(norm=Normalize(vmin=0,vmax=1),cmap=blue_to_red)
-        cb=fig.colorbar(sm,ax=ax,pad=.04,shrink=.70,label="Proximity to the Utopia Point")
+        cb=fig.colorbar(sm,ax=ax,fraction=.045,pad=.02,label="Proximity to the Utopia Point")
         cb.set_ticks([0,1]); cb.set_ticklabels(["Best", "Worst"])
+        cb.ax.tick_params(labelsize=font)
+        cb.set_label("Proximity to the Utopia Point", fontsize=font)
         return fig
 
     @render.download_button(filename="pcp_selected_solutions.csv")
@@ -1418,14 +1481,14 @@ def server(input, output, session):
 
     @render.download_button(filename="pcp_constrained_solutions.csv")
     def pcp_download_constrained():
-        df=pcp_table_data()
+        df=pcp_filtered(pcp_selected())
         yield df.to_csv(index=False) if df is not None else ""
 
     @render.download_button(filename="pcp_plot.png", media_type="image/png")
     def pcp_download_plot():
         df=pcp_selected()
         if df is None: return
-        fig=pcp_figure(df)
+        fig=pcp_figure(pcp_plot_order(df))
         buf=io.BytesIO()
         fig.savefig(buf,format="png",dpi=200,bbox_inches="tight")
         plt.close(fig)

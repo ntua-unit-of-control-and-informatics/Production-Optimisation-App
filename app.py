@@ -71,6 +71,14 @@ def load_direct_emulator(root):
     return predict, variables, outputs
 
 
+def help_dot(text):
+    return ui.tags.button("?", type="button", class_="widget-help", **{"data-help": text, "aria-label": text})
+
+
+def help_label(label, text):
+    return ui.span(label, " ", help_dot(text), class_="widget-help-label", **{"data-help": text})
+
+
 def card(title, *children):
     return ui.div(ui.h3(title, class_="card-title"), *children, class_="section-card")
 
@@ -101,6 +109,8 @@ def table_view(df, limit=200):
 
 
 app_ui = ui.page_fluid(
+    ui.tags.style(""".widget-help{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:20px;height:20px;border-radius:50%;border:1px solid #a9bfd5;background:#eaf2fa;color:#245681;font-size:13px;font-weight:700;padding:0;line-height:1;cursor:help;pointer-events:auto}.widget-help-label{display:inline;cursor:help}.widget-help:focus-visible{outline:2px solid #1769aa;outline-offset:2px}.widget-help-popup{position:fixed;z-index:20000;max-width:min(340px,calc(100vw - 24px));padding:10px 13px;background:#24374d;color:white;border-radius:8px;font-size:13px;line-height:1.45;box-shadow:0 4px 16px #0003;pointer-events:none}.frozen-controls .widget-help-label{pointer-events:auto}"""),
+    ui.tags.script("""(()=>{let tip,active;function hide(){if(tip)tip.remove();tip=null;active=null;}function show(el){if(active===el)return;hide();active=el;tip=document.createElement('div');tip.className='widget-help-popup';tip.setAttribute('role','tooltip');tip.textContent=el.dataset.help;document.body.append(tip);const r=el.getBoundingClientRect();tip.style.left=Math.max(12,Math.min(r.left,innerWidth-tip.offsetWidth-12))+'px';tip.style.top=(r.bottom+8+tip.offsetHeight>innerHeight?Math.max(8,r.top-tip.offsetHeight-8):r.bottom+8)+'px';}function target(e){return e.target.closest('.widget-help,.frozen-controls .widget-help-label');}document.addEventListener('pointerover',e=>{const el=target(e);if(el)show(el);});document.addEventListener('pointerout',e=>{if(active&&!active.contains(e.relatedTarget))hide();});document.addEventListener('focusin',e=>{const el=target(e);if(el)show(el);});document.addEventListener('focusout',hide);document.addEventListener('click',e=>{const el=target(e);if(el){e.preventDefault();e.stopPropagation();show(el);}else hide();},true);document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});window.addEventListener('scroll',hide,true);window.addEventListener('resize',hide);})();"""),
     ui.tags.script("""document.addEventListener('change', function(e){const el=e.target; if(!el.matches('.vg-role select'))return; const box=el.closest('.vg-role');box.classList.remove('decision','maximize','minimize');box.classList.add(['maximize','minimize'].includes(el.value.toLowerCase())?el.value.toLowerCase():'decision');});"""),
     ui.tags.style('\n.vg-editor {background:#fff;border:1px solid #d5e3f5;border-radius:12px;padding:12px;}\n.vg-heading {font-weight:700;color:#1746bc;margin:0 0 12px;}\n.vg-card {border:1px solid #dce5ef;border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#fff;}\n.vg-card:last-child {margin-bottom:0;}\n.vg-top {display:grid;grid-template-columns:24px 120px minmax(160px,1fr) minmax(185px, .9fr) 150px;align-items:center;gap:8px;}\n.vg-editor .shiny-input-container {width:100%!important;margin:0!important;}\n.vg-editor .form-group,.vg-editor .form-check {margin:0!important;}\n.vg-field,.vg-bounds {display:flex;align-items:center;gap:8px;}\n.vg-name input {font-weight:700;background:white!important;border-color:transparent!important;padding:3px 4px;}\n.vg-name input:focus {border-color:#93b4d8!important;}\n.vg-units {font-size:13px;color:#718096;padding-left:4px;}\n.vg-role select {font-weight:700;text-align:center;border-radius:12px;}\n.vg-role.decision select {background-color:#dbeafe!important;color:#1746bc;border-color:#93c5fd;}\n.vg-role.maximize select {background-color:#dcfce7!important;color:#166534;border-color:#86efac;}\n.vg-role.minimize select {background-color:#fee2e2!important;color:#991b1b;border-color:#fecaca;}\n.vg-bounds {justify-content:flex-end;margin-top:8px;padding-right:158px;}\n.vg-bounds .shiny-input-container {width:120px!important;}\n.vg-footer {display:flex;justify-content:center;gap:8px;width:100%;}\n.modal-footer:has(.vg-footer) {justify-content:center;}\n.modal-dialog:has(.vg-editor) {max-width:min(1120px,calc(100vw - 32px));}\n@media(max-width:850px){.vg-top{grid-template-columns:24px 120px minmax(0,1fr);}.vg-field{grid-column:2 / -1;}.vg-bounds{padding-right:0;flex-wrap:wrap;justify-content:flex-start;}}\n'),
     ui.tags.style('body {font-family: \'Segoe UI\',Arial,sans-serif; background:#f5f8fc; color:#20324d;}\n.app-shell {max-width: 1580px; margin:auto; padding:18px 26px 70px;}\n.top-header {display:flex; justify-content:space-between; align-items:center; gap:20px; background:linear-gradient(120deg,#e8f3ff,#f6faff); padding:22px 26px; border:1px solid #c9def5; border-radius:12px; margin-bottom:14px;}\n.app-heading h1 {font-size:27px; font-weight:750; color:#14346c; margin:0 0 6px;}\n.app-heading p {margin:0; color:#536b89;}\n.status-pill {white-space:nowrap; color:#19613c; font-weight:600;}\n.workflow {display:flex; gap:13px; flex-wrap:wrap; padding:14px 20px; border:1px solid #cddff1; background:white; border-radius:9px; margin-bottom:12px; color:#345c91; font-weight:600;}\n.case-accordion {margin-bottom:14px;}\n.main-tabs {background:white; border-radius:10px;}\n.main-tabs .nav-tabs {border-bottom:2px solid #7ba8d8; background:#eef5fd; padding:8px 8px 0; gap:4px;}\n.main-tabs .nav-link {font-weight:650; color:#335a8e; border:1px solid #c7d9ef; border-bottom:0; background:#e8f1fc;}\n.main-tabs .nav-link.active {color:#14346c; background:white; border-color:#7ba8d8;}\n.main-tabs .tab-content {padding:18px 20px 35px;}\n.step-heading {padding:18px 22px; background:#edf5ff; border:1px solid #d3e5f9; border-radius:10px; margin-bottom:15px;}\n.step-heading h2 {font-size:23px; color:#14346c; font-weight:700; margin:0 0 8px;}\n.step-heading p {margin:0;color:#4e6483;}\n.section-card {background:white; border:1px solid #d5e2ef; border-radius:10px; box-shadow:0 3px 14px #142a4d0b; padding:18px 20px; margin-bottom:15px;}\n.card-title {font-size:17px; color:#1c457c; font-weight:700; margin:0 0 13px;}\n.btn-action {background:#20834c !important; color:white !important; border:0 !important;}\n.btn-other {background:#7550a5 !important; color:white !important; border:0 !important;}\n.btn-locked {border:1px solid #b8c4d4; color:#8591a3; background:#e8ecf2; border-radius:6px; padding:8px 13px; margin:5px 8px 8px 0; cursor:not-allowed;}\n.button-row {display:flex; gap:12px; margin-bottom:16px;}\n.floating-help {position:fixed !important; right:26px; bottom:24px; width:54px; height:54px; border-radius:50% !important; padding:0 !important; display:flex; align-items:center; justify-content:center; font-size:27px; font-weight:800; color:white !important; background:#d62828 !important; border:3px solid white !important; box-shadow:0 4px 15px #0003; z-index:1050;}\n.help-done,.help-pending {padding:11px 14px; border-radius:8px; margin:8px 0;}\n.help-done {background:#dcfce7; color:#166534;}.help-pending {background:#f1f5f9; color:#334155;}\n.hint {color:#596a7f; font-size:14px; margin-top:12px;}\n@media(max-width:700px){.app-shell{padding:10px 10px 70px}.top-header{flex-direction:column;align-items:start}.workflow{gap:7px}.main-tabs .tab-content{padding:12px 8px}.floating-help{right:15px;bottom:15px}}\n\n/* Desktop-inspired workflow map (responsive, no images or JS needed) */\n.workflow-graphic{background:#fafafa;border:1px solid #e7eaf0;border-radius:12px;padding:28px 30px 24px;margin-bottom:16px;color:#34465b;}\n.wf-diagram{display:flex;align-items:center;gap:24px;min-height:165px;flex-wrap:wrap;margin-bottom:14px;}\n.wf-step{display:inline-flex;flex-shrink:0;align-items:center;gap:12px;min-width:156px;min-height:62px;padding:12px 14px;border:2px solid #dadada;background:#f1f1f1;border-radius:10px;box-shadow:0 3px 5px #00000012;font-weight:700;color:#1b2634;}\n.wf-active{background:#337ec4;border-color:#337ec4;color:white;}\n.wf-num{display:inline-flex;justify-content:center;align-items:center;min-width:33px;height:33px;padding:0 6px;background:#bdbdbd;border-radius:7px;color:white;font-weight:750;font-size:19px;}\n.wf-num-active{background:#053c84;}\n.wf-arrow{font-size:29px;font-weight:300;color:#b6b6b6;}\n.wf-fork{position:relative;display:flex;flex-direction:column;gap:20px;margin-left:30px;padding-left:56px;border-left:3px solid #bcbcbc;}\n.wf-branch{position:relative;display:flex;align-items:center;gap:25px;min-height:62px;}\n.wf-branch::before{content:"";position:absolute;left:-56px;top:50%;width:36px;border-top:3px solid #bcbcbc;}\n.wf-fork::before{content:"";position:absolute;top:50%;left:-48px;width:48px;border-top:2px solid #bcbcbc;}\n.wf-guide{border-left:4px solid #2682ef;padding:5px 0 5px 22px;margin:14px 0 18px;line-height:1.55;}\n.wf-symbol-title{font-weight:650;margin:10px 0;}\n.wf-symbol{margin:12px 0;}\n@media(max-width:900px){.workflow-graphic{padding:16px}.wf-diagram{gap:12px}.wf-step{min-width:125px}.wf-fork{margin-left:12px;padding-left:25px}.wf-branch::before{left:-25px;width:16px}.wf-fork::before{left:-40px;width:15px}}\n@media(max-width:650px){.wf-diagram{display:grid;grid-template-columns:1fr;gap:10px}.wf-arrow{display:none}.wf-fork{margin:0 0 0 14px;padding-left:16px;gap:10px}.wf-fork::before{display:none}.wf-branch{flex-wrap:wrap}.wf-branch::before{left:-16px;width:10px}.wf-step{min-height:52px}.wf-branch-bottom>.wf-arrow{display:none}}\n'),
@@ -154,54 +164,54 @@ app_ui = ui.page_fluid(
         ui.nav_panel("Data & Domain",
             ui.div(ui.h2("Step 1: Data & Domain"),
                    ui.p("Load experimental data, review inferred variables, and create or restore a domain table."), class_="step-heading"),
-            card("Load experimental data", upload("experimental", "Experimental CSV", [".csv"]),
+            card(help_label('Load experimental data', 'Select an experimental CSV. The file loads automatically and detected variables appear below.'), upload("experimental", "Experimental CSV", [".csv"]),
                  ui.output_text("data_status")),
-            card("Dataset preview", ui.output_data_frame("data_preview")),
-            card("Variable selection and settings",
+            card(help_label('Dataset preview', 'Shows the uploaded experimental dataset.'), ui.output_data_frame("data_preview")),
+            card(help_label('Variable selection and settings', 'Review detected variables. Use Edit Inputs or Edit Outputs to change roles, types, bounds and display decimals. Decimals affect display formatting.'),
                  ui.p("Review the detected columns. Domain creation uses the selected variable roles and observed bounds."),
                  ui.output_data_frame("variable_preview"),
                  ui.div(ui.input_action_button("edit_inputs", "Edit Inputs", class_="btn-option"), ui.input_action_button("edit_outputs", "Edit Outputs", class_="btn-option"), class_="button-row"),
                  ui.output_text("variable_status")),
-            card("Domain options",
+            card(help_label('Domain options', 'Create a domain from the selected variable settings or load a previously saved domain table.'),
                  ui.div(ui.input_action_button("create_domain", "Create Domain", class_="btn-action"),
                         class_="button-row"),
                  upload("domain_file", "Or load saved domain_table.csv", [".csv"]),
                  ui.output_text("domain_status")),
-            card("Domain table", ui.output_data_frame("domain_preview"),
+            card(help_label('Domain table', 'Shows the current domain definition, created from the dataset or restored from a saved domain table.'), ui.output_data_frame("domain_preview"),
                  ui.download_button("download_domain", "Export domain table", class_="btn-other")),
             value="data"),
         ui.nav_panel("Emulator Training",
             ui.div(ui.h2("Step 2: Emulator Training"), ui.p("Load a trained emulator and predict outputs. Training is disabled."), class_="step-heading"),
             ui.layout_columns(
                 card("Training parameters", ui.tags.fieldset(
-                    ui.input_numeric("emu_epochs", "Epochs", 1000, min=1, max=50000),
-                    ui.input_numeric("emu_folds", "CV folds", 2, min=2, max=20),
-                    ui.input_numeric("emu_test", "Test size", .10, min=.05, max=.40, step=.05),
+                    ui.input_numeric("emu_epochs", help_label('Epochs', 'Number of training epochs. Training is disabled in this preview.'), 1000, min=1, max=50000),
+                    ui.input_numeric("emu_folds", help_label('CV folds', 'Number of cross-validation folds. Training is disabled in this preview.'), 2, min=2, max=20),
+                    ui.input_numeric("emu_test", help_label('Test size', 'Fraction of data reserved for testing. Training is disabled in this preview.'), .10, min=.05, max=.40, step=.05),
                     disabled("Train Emulator"), disabled("Stop Training"), disabled=True, class_="frozen-controls")),
-                card("Load existing emulator", upload("emulator_zip", "Load emulator_model.zip or emulator_model.7z", [".zip", ".7z"]),
+                card(help_label('Load existing emulator', 'Loads a previously saved emulator from a ZIP or 7z archive.'), upload("emulator_zip", "Load emulator_model.zip or emulator_model.7z", [".zip", ".7z"]),
                  ui.output_text("emulator_status")), col_widths=(4,8)),
-            card("Saved emulator parity plot", ui.output_ui("emulator_plot_view")),
+            card(help_label('Saved emulator parity plot', 'Parity plots compare measured values against emulator predictions for each objective. A good emulator places points close to the diagonal.'), ui.output_ui("emulator_plot_view")),
             ui.output_ui("prediction_section"),
             value="emulator"),
         ui.nav_panel("TS-EMO Analysis",
             ui.div(ui.h2("Step 3: TS-EMO Analysis"), ui.p("Inspect saved optimisation data; running new TS-EMO studies is disabled."), class_="step-heading"),
              ui.layout_columns(
                 card("TS-EMO controls (preview unavailable)", ui.tags.fieldset(
-                     ui.input_select("ts_mode", "Run mode", ["Fresh Start", "Continue Previous Run"]),
-                     ui.input_select("ts_design", "Initial design", ["LHS", "SOBOL"]),
-                     ui.input_numeric("ts_initial", "Initial steps", 3), ui.input_numeric("ts_steps", "Total steps", 10),
-                     ui.input_checkbox("ts_auto", "Auto-stop on HV convergence", False),
-                     ui.layout_columns(ui.input_numeric("ts_window", "Window", 5), ui.input_numeric("ts_tol", "Tol.", .5)),
-                     ui.input_checkbox("ts_target", "Terminate on HV target", False),
-                     ui.layout_columns(ui.input_numeric("ts_percent", "Target (%)", 80), ui.input_numeric("ts_min", "Min steps", 5)),
-                     ui.input_checkbox("ts_time", "Terminate on total runtime", False), ui.input_numeric("ts_minutes", "Limit (min)", 4),
+                     ui.input_select("ts_mode", help_label('Run mode', 'Fresh Start resets the emulator to its baseline dataset. Continue Previous Run uses a loaded continuation file.'), ["Fresh Start", "Continue Previous Run"]),
+                     ui.input_select("ts_design", help_label('Initial design', 'LHS uses Latin Hypercube Sampling. SOBOL uses a Sobol low-discrepancy sequence for continuous variables.'), ["LHS", "SOBOL"]),
+                     ui.input_numeric("ts_initial", help_label('Initial steps', 'Number of initial-design suggestions before model-based TS-EMO takes over, independent of already observed experiments.'), 3), ui.input_numeric("ts_steps", help_label('Total steps', 'Total number of continuous TS-EMO iterations to run.'), 10),
+                     ui.input_checkbox("ts_auto", help_label('Auto-stop on HV convergence', 'Stop automatically if the HV curve appears to have converged.'), False),
+                     ui.layout_columns(ui.input_numeric("ts_window", help_label('Window', 'Number of recent HV points used to judge convergence.'), 5), ui.input_numeric("ts_tol", help_label('Tol.', 'Maximum allowed HV change within the selected window before convergence.'), .5)),
+                     ui.input_checkbox("ts_target", help_label('Terminate on HV target', 'Stop when HV coverage reaches the target after the minimum number of completed steps.'), False),
+                     ui.layout_columns(ui.input_numeric("ts_percent", help_label('Target (%)', 'HV coverage percentage that triggers early termination.'), 80), ui.input_numeric("ts_min", help_label('Min steps', 'Minimum completed steps before the HV target can stop the run.'), 5)),
+                     ui.input_checkbox("ts_time", help_label('Terminate on total runtime', 'Stop after the runtime limit, checked after each completed iteration.'), False), ui.input_numeric("ts_minutes", help_label('Limit (min)', 'Maximum total runtime in minutes.'), 4),
                      disabled("Run TS-EMO"), disabled("Stop Run"), disabled=True, class_="frozen-controls")),
-                card("Load previous HV results", disabled("Load Continue File"), ui.input_file("ts_files", "💾 Select HV coverage CSV", accept=[".csv"], multiple=False, width="100%"),
+                card(help_label('Load previous HV results', 'Load saved hypervolume coverage data to inspect optimisation progress.'), disabled("Load Continue File"), ui.input_file("ts_files", "💾 Select HV coverage CSV", accept=[".csv"], multiple=False, width="100%"),
                      ui.output_text("ts_files_filename"), ui.output_text("ts_load_status")), col_widths=(6,6)),
              ui.p("Status: Waiting — optimisation disabled in preview."),
              ui.tags.progress(value="0", max="100", class_="preview-progress"), ui.p("0/0     Elapsed: —     ETA: —"),
              ui.output_text("final_hv_summary"),
-            card("HV coverage", ui.layout_columns(
+            card(help_label('HV coverage', 'Hypervolume coverage tracks the progress of the saved optimisation study.'), ui.layout_columns(
                 ui.div(ui.h4("Hypervolume coverage plot"), ui.output_ui("hv_plot_view")),
                 ui.div(ui.h4("HV coverage data"), ui.output_data_frame("hv_preview")),
                 col_widths=(6,6))),
@@ -211,39 +221,39 @@ app_ui = ui.page_fluid(
             ui.div(ui.h2("Step 4: SHAP Analysis"), ui.p("Inspect saved SHAP explanations. Attribution generation is disabled."), class_="step-heading"),
             ui.layout_columns(
                 card("SHAP computation (preview unavailable)",
-                     ui.tags.fieldset(ui.input_numeric("shap_samples", "SHAP samples", 10, min=1, max=10000),
-                     ui.input_numeric("shap_batch", "Batch size", 5, min=1, max=100),
+                     ui.tags.fieldset(ui.input_numeric("shap_samples", help_label('SHAP samples', 'Number of samples to explain.'), 10, min=1, max=10000),
+                     ui.input_numeric("shap_batch", help_label('Batch size', 'Number of samples per SHAP batch.'), 5, min=1, max=100),
                      disabled("Run SHAP"), disabled("Stop SHAP"), disabled=True, class_="frozen-controls")),
-                card("Load previously generated SHAP data",
+                card(help_label('Load previously generated SHAP data', 'Select the SHAP master Excel workbook created earlier.'),
                      upload("shap_file", "SHAP master Excel workbook", [".xlsx"]),
                      ui.p("Saved workbook loads automatically.", class_="hint")),
                 col_widths=(5,7)),
-            card("Customize plot order",
+            card(help_label('Customize plot order', 'Drag objectives to change subplot order and inputs to change the y-axis order.'),
                  ui.p("Drag objectives and input variables to reorder the plots."),
                  ui.layout_columns(ui.div(ui.h4("Objectives — drag to reorder"), ui.output_ui("shap_objective_drag")),
                                    ui.div(ui.h4("Inputs — drag to reorder"), ui.output_ui("shap_variable_drag")), col_widths=(6,6)),
                  ui.output_text("shap_status")),
              ui.p("Status: Waiting — SHAP computation disabled in preview."),
              ui.tags.progress(value="0", max="100", class_="preview-progress"), ui.p("0/0     Elapsed: —     ETA: —"),
-            card("SHAP panel", ui.output_ui("shap_panel_view")),
+            card(help_label('SHAP panel', 'Each subplot corresponds to one objective. Points to the right increase the prediction; points to the left decrease it. Color represents feature value from low to high.'), ui.output_ui("shap_panel_view")),
             value="shap"),
         ui.nav_panel("PCPs",
             ui.div(ui.h2("Step 5: PCPs"), ui.p("Explore Pareto candidates, apply objective bounds and select representative optimal solutions."), class_="step-heading"),
-            card("Run a new PCP analysis",
+            card(help_label('Run a new PCP analysis', 'Build a PCP plot from a Pareto dataset and select a smaller representative subset.'),
                  upload("pcp_file", "Load Pareto CSV", [".csv"]),
-                 ui.input_numeric("pcp_n", "Selected points", 5, min=1, max=10000),
+                 ui.input_numeric("pcp_n", help_label('Selected points', 'Number of final solutions to keep and display.'), 5, min=1, max=10000),
                  ui.output_text("pcp_source_status"),
                  ui.input_action_button("pcp_run", "Run PCP Analysis", class_="btn-action"),
                  ui.output_text("pcp_status")),
-            card("PCP plot",
-                ui.input_selectize("pcp_legend", "Legend categoricals", choices=[], multiple=True, options={"plugins": ["remove_button"], "hideSelected": True}),
+            card(help_label('PCP plot', 'Each line is one selected solution. The color scale indicates proximity to the utopia point. Click a line to pin its details; drag the box to move it. Click the same line again to clear it.'),
+                ui.input_selectize("pcp_legend", help_label('Legend categoricals', 'Select categorical combinations to show on the plot.'), choices=[], multiple=True, options={"plugins": ["remove_button"], "hideSelected": True}),
                 ui.output_ui("pcp_plot_view"),
                 ui.div(ui.input_action_button("utopia_open", "View utopia point", class_="btn-option"),
                        ui.input_action_button("pcp_settings_open", "Objective bounds & display settings", class_="btn-option"),
                        ui.input_action_button("pcp_size_open", "Plot dimensions", class_="btn-option"),
                        style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;"),
                 ui.download_button("pcp_download_plot", "Save Plot (PNG)", class_="btn-other")),
-            card("Optimal Pareto solutions",
+            card(help_label('Optimal Pareto solutions', 'Preview selected solutions. You can filter by constraints and categorical values.'),
                 ui.div(
                     ui.div(ui.input_checkbox("pcp_constrained", "Constrained solutions", False), ui.input_action_button("constraints_open", "!", title="View failed solutions", style="border-radius:50%;background:#e9edf2;color:#43566e;font-weight:bold;width:28px;height:28px;padding:0;"), style="display:flex;align-items:center;gap:8px;"),
                     class_="pcp-toolbar", style="display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:18px;"),
@@ -656,8 +666,8 @@ def server(input, output, session):
         if not input.emulator_zip():
             return None
         if prediction_model.get() is None:
-            return card("Predict outputs", ui.output_text("prediction_status"))
-        return card("Predict outputs", ui.div(
+            return card(help_label('Predict outputs', 'Builds an input form from the loaded emulator and runs fast predictions for objective variables.'), ui.output_text("prediction_status"))
+        return card(help_label('Predict outputs', 'Builds an input form from the loaded emulator and runs fast predictions for objective variables.'), ui.div(
             ui.div(ui.h4("Input conditions"), ui.output_ui("prediction_form"),
                    ui.input_action_button("predict_outputs", "Predict Outputs", class_="btn-action")),
             ui.div(ui.h4("Predicted outputs", style="text-align:center;"),
